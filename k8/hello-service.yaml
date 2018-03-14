@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-hello
+  labels:
+    app: go-hello
+spec:
+  ports:
+  - name: web
+    port: 10123
+    protocol: TCP
+  selector:
+    app: go-hello
