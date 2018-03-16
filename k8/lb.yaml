@@ -1,0 +1,52 @@
+# cat rc.yaml         
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: lb
+  labels:
+    app: lb
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    app: lb
+    version: v1
+  template:
+    metadata:
+      labels:
+        app: lb
+        version: v1
+    spec:
+      nodeSelector:
+        role: loadbalancer
+      containers:
+      - image: gcr.io/google_containers/servicelb:0.4
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        name: haproxy
+        ports:
+        # Hello service
+        - containerPort: 9123
+          hostPort: 30123
+          protocol: TCP 
+        resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lb-service
+  labels:
+    app: lb
+spec:
+  ports:
+  - name: hello
+    port: 9123
+    protocol: TCP
+  selector:
+    app: go-hello
